@@ -31,6 +31,7 @@ export const WorkEntryModal: React.FC<WorkEntryModalProps> = ({
   const [recordType, setRecordType] = useState<EntryRecordType>('both');
   const [hoursWorked, setHoursWorked] = useState<string>('8');
   const [squareMeters, setSquareMeters] = useState<string>('20');
+  const [taskDescription, setTaskDescription] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -54,6 +55,7 @@ export const WorkEntryModal: React.FC<WorkEntryModalProps> = ({
       );
       setHoursWorked(String(initialEntry.hoursWorked || 0));
       setSquareMeters(String(initialEntry.squareMeters || 0));
+      setTaskDescription(initialEntry.taskDescription || '');
       setNotes(initialEntry.notes || '');
       setErrors({});
     } else {
@@ -64,6 +66,7 @@ export const WorkEntryModal: React.FC<WorkEntryModalProps> = ({
       setRecordType('both');
       setHoursWorked('8');
       setSquareMeters('20');
+      setTaskDescription('');
       setNotes('');
       setErrors({});
     }
@@ -71,8 +74,8 @@ export const WorkEntryModal: React.FC<WorkEntryModalProps> = ({
 
   if (!isOpen) return null;
 
-  const numHours = recordType === 'sqm_only' ? 0 : parseFloat(hoursWorked) || 0;
-  const numSqm = recordType === 'hours_only' ? 0 : parseFloat(squareMeters) || 0;
+  const numHours = recordType === 'sqm_only' ? 0 : parseFloat(String(hoursWorked).replace(',', '.')) || 0;
+  const numSqm = recordType === 'hours_only' ? 0 : parseFloat(String(squareMeters).replace(',', '.')) || 0;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,13 +91,22 @@ export const WorkEntryModal: React.FC<WorkEntryModalProps> = ({
       newErrors.location = 'Вкажіть об’єкт / місце, де виконуються роботи';
     }
 
-    if (recordType === 'hours_only' && (isNaN(numHours) || numHours <= 0)) {
-      newErrors.hoursWorked = 'Вкажіть кількість відпрацьованих годин (> 0)';
-    } else if (recordType === 'sqm_only' && (isNaN(numSqm) || numSqm <= 0)) {
-      newErrors.squareMeters = 'Вкажіть кількість збудованих квадратних метрів (> 0)';
+    if (recordType === 'hours_only') {
+      if (isNaN(numHours) || numHours <= 0) {
+        newErrors.hoursWorked = 'Вкажіть кількість відпрацьованих годин (> 0)';
+      }
+    } else if (recordType === 'sqm_only') {
+      if (isNaN(numSqm) || numSqm < 0.1 || numSqm > 1000) {
+        newErrors.squareMeters = 'Вкажіть кількість квадратних метрів від 0.1 до 1000 м²';
+      }
     } else if (recordType === 'both') {
-      if ((isNaN(numHours) || numHours <= 0) && (isNaN(numSqm) || numSqm <= 0)) {
-        newErrors.hoursWorked = 'Вкажіть години або квадратні метри (хоча б одне значення)';
+      const hasHours = !isNaN(numHours) && numHours > 0;
+      const hasSqm = !isNaN(numSqm) && numSqm > 0;
+      if (!hasHours && !hasSqm) {
+        newErrors.hoursWorked = 'Вкажіть години (> 0) або квадратні метри (від 0.1 до 1000 м²)';
+      }
+      if (hasSqm && (numSqm < 0.1 || numSqm > 1000)) {
+        newErrors.squareMeters = 'Кількість квадратних метрів має бути від 0.1 до 1000 м²';
       }
     }
 
@@ -113,7 +125,7 @@ export const WorkEntryModal: React.FC<WorkEntryModalProps> = ({
       employeeId: matchedEmployee?.id,
       employeeName: employeeName.trim(),
       location: location.trim(),
-      taskDescription: initialEntry?.taskDescription || undefined,
+      taskDescription: taskDescription.trim() || undefined,
       category,
       recordType,
       hoursWorked: numHours,
@@ -355,15 +367,17 @@ export const WorkEntryModal: React.FC<WorkEntryModalProps> = ({
                   <Layers className="w-3.5 h-3.5" />
                   Розрахунок 2: Квадратні метри (м²)
                 </span>
-                {recordType === 'sqm_only' && (
-                  <span className="text-[10px] text-emerald-300 bg-emerald-500/20 px-1.5 py-0.2 rounded">Тільки м²</span>
-                )}
+                <span className="text-[10px] text-emerald-300/80 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                  від 0.1 до 1000 м²
+                </span>
               </label>
               <input
                 id="square-meters"
                 type="number"
-                step="0.5"
-                min="0"
+                step="0.1"
+                min="0.1"
+                max="1000"
+                placeholder="напр. 16.5 або 0.1 - 1000"
                 disabled={recordType === 'hours_only'}
                 value={recordType === 'hours_only' ? '0' : squareMeters}
                 onChange={(e) => setSquareMeters(e.target.value)}
@@ -371,17 +385,62 @@ export const WorkEntryModal: React.FC<WorkEntryModalProps> = ({
               />
               {/* Quick SQM Presets */}
               {recordType !== 'hours_only' && (
-                <div className="flex gap-1.5 mt-2">
-                  {['15', '25', '35', '50'].map((m) => (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {['0.1', '0.5', '10', '16.5', '26', '50', '100'].map((m) => (
                     <button
                       key={m}
                       type="button"
                       onClick={() => setSquareMeters(m)}
-                      className="flex-1 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] font-semibold text-slate-300 hover:text-emerald-300 transition cursor-pointer"
+                      className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] font-semibold text-slate-300 hover:text-emerald-300 transition cursor-pointer"
                     >
                       {m}м²
                     </button>
                   ))}
+                </div>
+              )}
+
+              {/* Що саме будували (відображається в таблиці поруч з м²) */}
+              {recordType !== 'hours_only' && (
+                <div className="mt-3 pt-2.5 border-t border-emerald-500/25">
+                  <label htmlFor="task-description" className="block text-xs font-bold text-emerald-300 mb-1 flex items-center justify-between">
+                    <span>Що саме будували:</span>
+                    <span className="text-[10px] text-emerald-400/80 font-normal">відображається в таблиці</span>
+                  </label>
+                  <input
+                    id="task-description"
+                    type="text"
+                    list="built-suggestions"
+                    placeholder="напр. Стіни, Кладка цегли, Перегородки, Фасад"
+                    value={taskDescription}
+                    onChange={(e) => setTaskDescription(e.target.value)}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+                  />
+                  <datalist id="built-suggestions">
+                    <option value="Стіни" />
+                    <option value="Перегородки" />
+                    <option value="Кладка цегли" />
+                    <option value="Газоблок" />
+                    <option value="Фасад" />
+                    <option value="Штукатурка" />
+                    <option value="Плитка" />
+                    <option value="Стяжка" />
+                  </datalist>
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    {['Стіни', 'Перегородки', 'Кладка цегли', 'Газоблок', 'Фасад'].map((item) => (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => setTaskDescription(item)}
+                        className={`px-2 py-0.5 rounded text-[10px] font-semibold transition cursor-pointer border ${
+                          taskDescription === item
+                            ? 'bg-emerald-500 text-slate-950 font-bold border-emerald-400 shadow-sm'
+                            : 'bg-slate-800 text-slate-300 hover:text-emerald-300 border-slate-700 hover:border-emerald-500/40'
+                        }`}
+                      >
+                        +{item}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
               {errors.squareMeters && (

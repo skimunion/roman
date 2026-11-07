@@ -39,7 +39,7 @@ export function formatHours(hours: number): string {
  */
 export function formatSquareMeters(sqm: number): string {
   const rounded = round(sqm, 2);
-  return Number.isInteger(rounded) ? `${rounded}` : rounded.toFixed(1);
+  return `${rounded}`;
 }
 
 /**
@@ -139,6 +139,7 @@ export function calculateWeekSummary(
       dayHours: Record<string, number>;
       daySquareMeters: Record<string, number>;
       dayLocations: Record<string, string[]>;
+      dayTasks: Record<string, string[]>;
     }
   >();
 
@@ -155,6 +156,7 @@ export function calculateWeekSummary(
         dayHours: {},
         daySquareMeters: {},
         dayLocations: {},
+        dayTasks: {},
       });
     });
   }
@@ -172,6 +174,7 @@ export function calculateWeekSummary(
         dayHours: {},
         daySquareMeters: {},
         dayLocations: {},
+        dayTasks: {},
       });
     }
 
@@ -179,6 +182,17 @@ export function calculateWeekSummary(
     const hours = Number(entry.hoursWorked) || 0;
     const sqm = Number(entry.squareMeters) || 0;
     const loc = (entry.location || '').trim();
+    const task = (entry.taskDescription || '').trim();
+
+    // Запис що саме будували
+    if (task) {
+      if (!rec.dayTasks[entry.date]) {
+        rec.dayTasks[entry.date] = [];
+      }
+      if (!rec.dayTasks[entry.date].includes(task)) {
+        rec.dayTasks[entry.date].push(task);
+      }
+    }
 
     // Запис локації працівника на конкретну дату
     if (loc) {
@@ -221,6 +235,7 @@ export function calculateWeekSummary(
       dayHours: rec.dayHours,
       daySquareMeters: rec.daySquareMeters,
       dayLocations: rec.dayLocations,
+      dayTasks: rec.dayTasks,
     }))
     .sort((a, b) => {
       const idxA = rosterOrderMap.has(a.employeeName) ? rosterOrderMap.get(a.employeeName)! : 999;

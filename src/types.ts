@@ -58,6 +58,7 @@ export interface EmployeeWeeklySummary {
   dayHours: Record<string, number>; // date -> hours
   daySquareMeters: Record<string, number>; // date -> m²
   dayLocations: Record<string, string[]>; // date -> locations
+  dayTasks: Record<string, string[]>; // date -> what was built
 }
 
 export interface CategorySummary {

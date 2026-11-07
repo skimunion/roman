@@ -29,8 +29,8 @@ import { CrewRosterModal } from './components/CrewRosterModal';
 import { DatePickerModal } from './components/DatePickerModal';
 import { MapPin, Clock, Layers, Sparkles } from 'lucide-react';
 
-const STORAGE_KEY_ENTRIES = 'cicwma_exact_photo_entries_v2';
-const STORAGE_KEY_EMPLOYEES = 'cicwma_exact_photo_employees_v2';
+const STORAGE_KEY_ENTRIES = 'cicwma_exact_photo_entries_v3';
+const STORAGE_KEY_EMPLOYEES = 'cicwma_exact_photo_employees_v3';
 
 export default function App() {
   const initialMonday = useMemo(() => getMondayOfWeek(new Date()), []);
@@ -263,7 +263,7 @@ export default function App() {
       />
 
       {/* Main View - EXACT TABLE FROM THE PHOTO */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 space-y-6">
+      <main className="flex-1 w-full max-w-[1700px] mx-auto px-3 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* The Exact Photo Table */}
         <div className="space-y-3">
           <MainTimesheetTable

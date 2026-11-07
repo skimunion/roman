@@ -17,12 +17,12 @@ export const MainTimesheetTable: React.FC<MainTimesheetTableProps> = ({
 }) => {
   return (
     <div className="w-full overflow-x-auto rounded-2xl border border-slate-800/90 bg-[#090e1c] shadow-2xl">
-      <table className="w-full text-left border-collapse select-none">
+      <table className="w-full min-w-[1200px] text-left border-collapse select-none">
         {/* Table Header */}
         <thead>
           <tr className="border-b border-slate-800 bg-[#0b1224] text-slate-300">
             {/* Employee Name Column */}
-            <th className="py-4 px-5 text-sm font-black text-white whitespace-nowrap min-w-[160px]">
+            <th className="py-4 px-6 text-sm sm:text-base font-black text-white whitespace-nowrap min-w-[180px]">
               ПІБ працівника
             </th>
 
@@ -38,12 +38,12 @@ export const MainTimesheetTable: React.FC<MainTimesheetTableProps> = ({
               return (
                 <th
                   key={d.date}
-                  className="py-3 px-3 text-center align-top border-l border-slate-800/80 min-w-[110px]"
+                  className="py-3.5 px-3 text-center align-top border-l border-slate-800/80 min-w-[120px]"
                 >
-                  <div className="font-extrabold text-sm text-white tracking-wide">
+                  <div className="font-extrabold text-sm sm:text-base text-white tracking-wide">
                     {d.shortDayName}
                   </div>
-                  <div className="text-xs font-bold text-amber-400 mt-0.5">
+                  <div className="text-xs sm:text-sm font-bold text-amber-400 mt-0.5">
                     {dayNum}.{monthNum}
                   </div>
 
@@ -56,9 +56,9 @@ export const MainTimesheetTable: React.FC<MainTimesheetTableProps> = ({
                           type="button"
                           onClick={() => onAddEntryForDate(d.date)}
                           title={`Додати роботу на об'єкті: ${loc}`}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-950/70 hover:bg-sky-900/80 text-sky-400 border border-sky-500/40 hover:border-sky-400 transition cursor-pointer max-w-[125px] truncate"
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-950/80 hover:bg-sky-900 text-sky-400 border border-sky-500/40 hover:border-sky-400 transition cursor-pointer max-w-[145px] truncate shadow-sm"
                         >
-                          <MapPin className="w-3 h-3 shrink-0 text-sky-400" />
+                          <MapPin className="w-3.5 h-3.5 shrink-0 text-sky-400" />
                           <span className="truncate">{loc}</span>
                         </button>
                       ))
@@ -71,13 +71,13 @@ export const MainTimesheetTable: React.FC<MainTimesheetTableProps> = ({
             })}
 
             {/* Totals Columns */}
-            <th className="py-4 px-3 text-center text-sm font-extrabold text-white border-l border-slate-800/80 min-w-[70px]">
+            <th className="py-4 px-4 text-center text-sm sm:text-base font-extrabold text-white border-l border-slate-800/80 min-w-[80px]">
               Днів
             </th>
-            <th className="py-4 px-4 text-right text-sm font-black text-amber-400 border-l border-slate-800/80 min-w-[120px]">
+            <th className="py-4 px-5 text-right text-sm sm:text-base font-black text-amber-400 border-l border-slate-800/80 min-w-[140px]">
               Всього годин
             </th>
-            <th className="py-4 px-5 text-right text-sm font-black text-emerald-400 border-l border-slate-800/80 min-w-[140px]">
+            <th className="py-4 px-6 text-right text-sm sm:text-base font-black text-emerald-400 border-l border-slate-800/80 min-w-[160px]">
               Всього збудовано
             </th>
           </tr>
@@ -91,7 +91,7 @@ export const MainTimesheetTable: React.FC<MainTimesheetTableProps> = ({
               className="hover:bg-slate-800/30 transition-colors group"
             >
               {/* Employee Name */}
-              <td className="py-3 px-5 text-sm font-bold text-white whitespace-nowrap">
+              <td className="py-3.5 px-6 text-sm sm:text-base font-bold text-white whitespace-nowrap">
                 <div className="flex items-center gap-2.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0 shadow-sm shadow-amber-400/50" />
                   <span className="tracking-wide group-hover:text-amber-300 transition-colors">
@@ -104,6 +104,7 @@ export const MainTimesheetTable: React.FC<MainTimesheetTableProps> = ({
               {summary.days.map((d) => {
                 const h = emp.dayHours[d.date];
                 const sqm = emp.daySquareMeters[d.date];
+                const tasks = emp.dayTasks?.[d.date] || [];
                 const hasData = Boolean(h || sqm);
 
                 return (
@@ -111,42 +112,52 @@ export const MainTimesheetTable: React.FC<MainTimesheetTableProps> = ({
                     key={d.date}
                     onClick={() => onCellClick(d.date, emp.employeeName)}
                     title={`Клікніть щоб записати або змінити роботу: ${emp.employeeName} (${d.dayName}, ${d.date})`}
-                    className={`py-3 px-2 text-center text-sm border-l border-slate-800/80 transition cursor-pointer select-none ${
+                    className={`py-3.5 px-3 text-center text-sm border-l border-slate-800/80 transition cursor-pointer select-none ${
                       hasData ? 'hover:bg-amber-500/10' : 'hover:bg-slate-800/40'
                     }`}
                   >
                     {hasData ? (
-                      <div className="space-y-0.5">
+                      <div className="space-y-1">
                         {h ? (
-                          <span className="block font-black text-amber-400 text-sm tracking-tight">
+                          <span className="block font-black text-amber-400 text-sm sm:text-base tracking-tight">
                             {formatHours(h)}г
                           </span>
                         ) : null}
                         {sqm ? (
-                          <span className="block font-black text-emerald-400 text-sm tracking-tight">
-                            {formatSquareMeters(sqm)}м²
-                          </span>
+                          <div className="flex flex-col items-center">
+                            <span className="block font-black text-emerald-400 text-sm sm:text-base tracking-tight">
+                              {formatSquareMeters(sqm)}м²
+                            </span>
+                            {tasks.length > 0 && (
+                              <span
+                                title={`Збудовано: ${tasks.join(', ')}`}
+                                className="inline-block mt-0.5 px-2 py-0.5 text-[11px] font-bold text-emerald-200 bg-emerald-950/80 rounded border border-emerald-500/40 max-w-[125px] truncate shadow-sm"
+                              >
+                                {tasks.join(', ')}
+                              </span>
+                            )}
+                          </div>
                         ) : null}
                       </div>
                     ) : (
-                      <span className="text-slate-600 font-normal text-sm group-hover:text-slate-500">—</span>
+                      <span className="text-slate-600 font-normal text-sm sm:text-base group-hover:text-slate-500">—</span>
                     )}
                   </td>
                 );
               })}
 
               {/* Days count */}
-              <td className="py-3 px-3 text-center text-sm font-bold text-white border-l border-slate-800/80">
+              <td className="py-3.5 px-4 text-center text-sm sm:text-base font-bold text-white border-l border-slate-800/80">
                 {emp.daysWorkedCount}
               </td>
 
               {/* Total Hours for employee */}
-              <td className="py-3 px-4 text-right font-black text-amber-400 text-sm border-l border-slate-800/80 whitespace-nowrap">
+              <td className="py-3.5 px-5 text-right font-black text-amber-400 text-sm sm:text-base border-l border-slate-800/80 whitespace-nowrap">
                 {formatHours(emp.totalHours)} год.
               </td>
 
               {/* Total Square Meters for employee */}
-              <td className="py-3 px-5 text-right font-black text-emerald-400 text-sm border-l border-slate-800/80 whitespace-nowrap">
+              <td className="py-3.5 px-6 text-right font-black text-emerald-400 text-sm sm:text-base border-l border-slate-800/80 whitespace-nowrap">
                 {formatSquareMeters(emp.totalSquareMeters)} м²
               </td>
             </tr>
@@ -156,7 +167,7 @@ export const MainTimesheetTable: React.FC<MainTimesheetTableProps> = ({
         {/* Table Footer - Grand Totals matching photo */}
         <tfoot>
           <tr className="border-t-2 border-slate-700 bg-[#080d1a] font-black">
-            <td className="py-4 px-5 text-sm font-black text-white uppercase tracking-wider">
+            <td className="py-4 px-6 text-sm sm:text-base font-black text-white uppercase tracking-wider">
               РАЗОМ ЗА ДЕНЬ:
             </td>
 
@@ -168,40 +179,40 @@ export const MainTimesheetTable: React.FC<MainTimesheetTableProps> = ({
               return (
                 <td
                   key={d.date}
-                  className="py-3 px-2 text-center text-sm border-l border-slate-800/80"
+                  className="py-3.5 px-3 text-center text-sm border-l border-slate-800/80"
                 >
                   {hasData ? (
                     <div className="space-y-0.5">
                       {h > 0 ? (
-                        <span className="block font-black text-amber-400 text-sm tracking-tight">
+                        <span className="block font-black text-amber-400 text-sm sm:text-base tracking-tight">
                           {formatHours(h)}г
                         </span>
                       ) : null}
                       {sqm > 0 ? (
-                        <span className="block font-black text-emerald-400 text-sm tracking-tight">
+                        <span className="block font-black text-emerald-400 text-sm sm:text-base tracking-tight">
                           {formatSquareMeters(sqm)}м²
                         </span>
                       ) : null}
                     </div>
                   ) : (
-                    <span className="text-slate-600 font-medium text-sm">—</span>
+                    <span className="text-slate-600 font-medium text-sm sm:text-base">—</span>
                   )}
                 </td>
               );
             })}
 
             {/* Total Workers count */}
-            <td className="py-4 px-3 text-center text-xs font-bold text-white border-l border-slate-800/80 leading-tight">
+            <td className="py-4 px-4 text-center text-xs sm:text-sm font-bold text-white border-l border-slate-800/80 leading-tight">
               {summary.uniqueEmployeesCount} майстрів
             </td>
 
             {/* Grand Total Hours */}
-            <td className="py-4 px-4 text-right text-base font-black text-amber-400 border-l border-slate-800/80 whitespace-nowrap">
+            <td className="py-4 px-5 text-right text-base sm:text-lg font-black text-amber-400 border-l border-slate-800/80 whitespace-nowrap">
               {formatHours(summary.totalManHours)} год.
             </td>
 
             {/* Grand Total Square Meters */}
-            <td className="py-4 px-5 text-right text-base font-black text-emerald-400 border-l border-slate-800/80 whitespace-nowrap">
+            <td className="py-4 px-6 text-right text-base sm:text-lg font-black text-emerald-400 border-l border-slate-800/80 whitespace-nowrap">
               {formatSquareMeters(summary.totalSquareMeters)} м²
             </td>
           </tr>
