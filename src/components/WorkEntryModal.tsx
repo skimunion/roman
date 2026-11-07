@@ -9,6 +9,7 @@ interface WorkEntryModalProps {
   onSave: (entry: Omit<WorkEntry, 'id' | 'createdAt'> & { id?: string }) => void;
   initialEntry?: WorkEntry | null;
   defaultDate?: string;
+  defaultEmployeeName?: string;
   employees: Employee[];
   existingLocations?: string[];
 }
@@ -19,6 +20,7 @@ export const WorkEntryModal: React.FC<WorkEntryModalProps> = ({
   onSave,
   initialEntry,
   defaultDate,
+  defaultEmployeeName,
   employees,
   existingLocations = [],
 }) => {
@@ -56,8 +58,8 @@ export const WorkEntryModal: React.FC<WorkEntryModalProps> = ({
       setErrors({});
     } else {
       setDate(defaultDate || new Date().toISOString().split('T')[0]);
-      setEmployeeName(employees.length > 0 ? employees[0].name : '');
-      setLocation(allAvailableLocations[0] || 'ЖК «Сонячний», Секція 2');
+      setEmployeeName(defaultEmployeeName || (employees.length > 0 ? employees[0].name : ''));
+      setLocation(allAvailableLocations[0] || 'Genk Турки');
       setCategory('Мурування та кладка');
       setRecordType('both');
       setHoursWorked('8');
@@ -65,7 +67,7 @@ export const WorkEntryModal: React.FC<WorkEntryModalProps> = ({
       setNotes('');
       setErrors({});
     }
-  }, [initialEntry, defaultDate, isOpen, employees]);
+  }, [initialEntry, defaultDate, defaultEmployeeName, isOpen, employees]);
 
   if (!isOpen) return null;
 

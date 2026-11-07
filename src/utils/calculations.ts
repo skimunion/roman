@@ -205,6 +205,13 @@ export function calculateWeekSummary(
     }
   });
 
+  const rosterOrderMap = new Map<string, number>();
+  if (rosterEmployees && rosterEmployees.length > 0) {
+    rosterEmployees.forEach((emp, index) => {
+      rosterOrderMap.set(emp.name.trim(), index);
+    });
+  }
+
   const employeeSummaries: EmployeeWeeklySummary[] = Array.from(employeeMap.values())
     .map((rec) => ({
       employeeName: rec.name,
@@ -215,7 +222,12 @@ export function calculateWeekSummary(
       daySquareMeters: rec.daySquareMeters,
       dayLocations: rec.dayLocations,
     }))
-    .sort((a, b) => b.totalHours - a.totalHours || b.totalSquareMeters - a.totalSquareMeters);
+    .sort((a, b) => {
+      const idxA = rosterOrderMap.has(a.employeeName) ? rosterOrderMap.get(a.employeeName)! : 999;
+      const idxB = rosterOrderMap.has(b.employeeName) ? rosterOrderMap.get(b.employeeName)! : 999;
+      if (idxA !== idxB) return idxA - idxB;
+      return b.totalHours - a.totalHours || b.totalSquareMeters - a.totalSquareMeters;
+    });
 
   // Групування за локаціями / об'єктами ("де виконуються роботи")
   const locationMap = new Map<
